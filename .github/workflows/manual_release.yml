@@ -1,0 +1,40 @@
+name: 3 📦🚀 Release
+
+
+on:
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Número de versión del pre-release a liberar.
+        required: true
+        type: string
+      dynamodb:
+        description: 'Desmarcar la casilla para desactivar la insercion a DynamoDB'
+        required: false
+        default: true
+        type: boolean
+concurrency: production
+
+jobs:
+
+  CreateRelease:
+    permissions: write-all
+    uses: victoraguilarc/aws-sam-github/.github/workflows/reusable_create-release.yml@main
+    with:
+      version: "${{github.event.inputs.version}}"
+
+  Release:
+    needs: CreateRelease
+    uses: victoraguilarc/aws-sam-github/.github/workflows/reusable_deploy.yml@main
+    with:
+      ambiente: "production"
+      ref: "${{github.event.inputs.version}}"
+      region: us-east-1
+      dynamodb: ${{github.event.inputs.dynamodb}}
+
+    secrets: inherit
+permissions:
+  id-token: write
+  
+  contents: read

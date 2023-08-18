@@ -1,0 +1,46 @@
+name: 5 🐛 Fix Release
+
+
+on:
+  
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Versión a la que se le hará hotfix
+        required: true
+        type: string
+      version_fix:
+        description: Versión que se estaría liberando para este fix. Ej. Si la versión a corregir es 3.0.1 esta versión sería 3.0.2
+        required: true
+        type: string
+      dynamodb:
+        description: 'Activa la insercion de datos de la carpeta tablas DynamoDB ⚠️ CUIDADO: Validar que la inserción en tablas no afecta a otros procesos.'
+        required: false
+        default: false
+        type: boolean
+
+concurrency: develop
+
+jobs:
+
+  Hotfix:
+    permissions: write-all
+    uses: victoraguilarc/aws-sam-github/.github/workflows/reusable_create_fix.yml@main
+    with:
+      ref: ${{github.event.inputs.version}}
+      fix: ${{github.event.inputs.version_fix}}
+
+  DevDeploy:
+    needs: Hotfix
+    uses: victoraguilarc/aws-sam-github/.github/workflows/reusable_deploy.yml@main
+    with:
+      ambiente: "develop"
+      region: us-east-1
+      ref: fix/${{github.event.inputs.version_fix}}
+      rama_config: "fix/${{github.event.inputs.version_fix}}"
+      region_dr: us-west-2
+      dynamodb: ${{github.event.inputs.dynamodb}}
+    secrets: inherit
+permissions:
+  id-token: write
+  contents: read    

@@ -1,0 +1,7 @@
+{
+   "project":"workshop",
+   "cfn_stack":"aws-sam-github-workshop",
+   "cfn_lint_version":"0.56.4",
+   "sam_container":"public.ecr.aws/sam/build-python3.8:1.32.0",
+   "sam_bucket":"aws-sam-github"
+}
